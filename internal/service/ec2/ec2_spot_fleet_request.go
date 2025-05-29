@@ -803,6 +803,11 @@ func resourceSpotFleetRequest() *schema.Resource {
 										ForceNew:         true,
 										ValidateDiagFunc: enum.Validate[awstypes.ReplacementStrategy](),
 									},
+									"termination_delay": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(120, 7200),
+									},
 								},
 							},
 						},
@@ -1845,6 +1850,10 @@ func expandSpotCapacityRebalance(l []any) *awstypes.SpotCapacityRebalance {
 		capacityRebalance.ReplacementStrategy = awstypes.ReplacementStrategy(v.(string))
 	}
 
+	if v, ok := m["termination_delay"].(int); ok {
+		capacityRebalance.TerminationDelay = aws.Int32(int32(v))
+	}
+
 	return capacityRebalance
 }
 
@@ -2218,6 +2227,10 @@ func flattenSpotCapacityRebalance(spotCapacityRebalance *awstypes.SpotCapacityRe
 
 	m := map[string]any{
 		"replacement_strategy": spotCapacityRebalance.ReplacementStrategy,
+	}
+
+	if v := spotCapacityRebalance.TerminationDelay; v != nil {
+		m["termination_delay"] = aws.ToInt32(v)
 	}
 
 	return []any{m}
